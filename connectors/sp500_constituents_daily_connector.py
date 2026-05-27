@@ -13,13 +13,22 @@ from dataclasses import dataclass
 from html.parser import HTMLParser
 from pathlib import Path
 
-from sp500_daily_connector import (
-    YAHOO_CHART_URL,
-    date_to_unix,
-    format_decimal,
-    format_return,
-    parse_date,
-)
+try:
+    from connectors.sp500_daily_connector import (
+        YAHOO_CHART_URL,
+        date_to_unix,
+        format_decimal,
+        format_return,
+        parse_date,
+    )
+except ModuleNotFoundError:
+    from sp500_daily_connector import (
+        YAHOO_CHART_URL,
+        date_to_unix,
+        format_decimal,
+        format_return,
+        parse_date,
+    )
 
 
 SP500_CONSTITUENTS_URL = (

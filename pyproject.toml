@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stock-analysis"
+version = "0.1.0"
+description = "Dependency-free S&P 500 data connectors and beta calculator."
+requires-python = ">=3.10"
+
+[project.scripts]
+stock-analysis-tool = "stock_analysis_tool:main"
+
+[tool.setuptools]
+py-modules = ["stock_analysis_tool"]
+packages = ["analysis", "connectors"]

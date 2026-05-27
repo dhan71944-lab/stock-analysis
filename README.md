@@ -3,6 +3,30 @@
 This workspace contains a small connector for downloading daily S&P 500 index
 price history and close-to-close daily returns as CSV.
 
+## Python tool
+
+Use `stock_analysis_tool.py` as the agent/system-friendly entrypoint. It exposes
+stable subcommands and can print machine-readable JSON summaries.
+
+```powershell
+python .\stock_analysis_tool.py --json calculate-betas --index-csv .\data\sp500_daily.csv --constituents-csv .\data\sp500_constituents_daily.csv --output .\data\sp500_constituent_betas.csv
+```
+
+Available subcommands:
+
+```text
+download-index
+download-constituents
+calculate-betas
+run-beta-pipeline
+```
+
+If installed as a Python package, the console command is:
+
+```powershell
+stock-analysis-tool --json calculate-betas --index-csv .\data\sp500_daily.csv --constituents-csv .\data\sp500_constituents_daily.csv --output .\data\sp500_constituent_betas.csv
+```
+
 ## S&P 500 daily connector
 
 Run:
