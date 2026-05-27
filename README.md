@@ -18,6 +18,7 @@ Available subcommands:
 download-index
 download-constituents
 calculate-betas
+calculate-capm-returns
 run-beta-pipeline
 ```
 
@@ -101,6 +102,27 @@ and writes one row per ticker:
 
 ```text
 ticker, yahoo_symbol, company, sector, observations, beta
+```
+
+## CAPM theoretical daily returns
+
+After generating index returns, constituent returns, and betas, calculate
+theoretical daily returns with CAPM:
+
+```powershell
+python .\analysis\calculate_capm_daily_returns.py --index-csv .\data\sp500_daily.csv --constituents-csv .\data\sp500_constituents_daily.csv --betas-csv .\data\sp500_constituent_betas.csv --output .\data\sp500_constituents_capm_daily_returns.csv --rf-daily 0.0001747
+```
+
+The formula is:
+
+```text
+theoretical_daily_return = rf_daily + beta * (index_daily_return - rf_daily)
+```
+
+The output preserves the constituent daily rows and appends:
+
+```text
+index_daily_return, rf_daily, beta, theoretical_daily_return
 ```
 
 ## Note on NYSE data

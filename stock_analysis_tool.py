@@ -13,6 +13,10 @@ from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any
 
+from analysis.calculate_capm_daily_returns import (
+    DEFAULT_RF_DAILY,
+    write_capm_daily_returns_csv,
+)
 from analysis.calculate_sp500_betas import calculate_betas, write_betas_csv
 from connectors.sp500_constituents_daily_connector import (
     Sp500ConstituentsDailyConnector,
@@ -69,6 +73,25 @@ def command_calculate_betas(args: argparse.Namespace) -> dict[str, Any]:
         "constituents_csv": str(args.constituents_csv),
         "output_path": str(args.output),
         "min_observations": args.min_observations,
+    }
+
+
+def command_calculate_capm_returns(args: argparse.Namespace) -> dict[str, Any]:
+    rows = write_capm_daily_returns_csv(
+        index_csv=args.index_csv,
+        constituents_csv=args.constituents_csv,
+        betas_csv=args.betas_csv,
+        output_path=args.output,
+        rf_daily=args.rf_daily,
+    )
+    return {
+        "command": "calculate-capm-returns",
+        "rows": rows,
+        "index_csv": str(args.index_csv),
+        "constituents_csv": str(args.constituents_csv),
+        "betas_csv": str(args.betas_csv),
+        "output_path": str(args.output),
+        "rf_daily": args.rf_daily,
     }
 
 
@@ -159,6 +182,13 @@ def build_parser() -> argparse.ArgumentParser:
     add_beta_args(betas)
     betas.set_defaults(handler=command_calculate_betas)
 
+    capm = subparsers.add_parser(
+        "calculate-capm-returns",
+        help="Calculate CAPM theoretical daily returns from beta and return CSVs.",
+    )
+    add_capm_args(capm)
+    capm.set_defaults(handler=command_calculate_capm_returns)
+
     pipeline = subparsers.add_parser(
         "run-beta-pipeline",
         help="Download index data, download constituent data, and calculate betas.",
@@ -197,6 +227,20 @@ def add_beta_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--min-observations", type=int, default=2)
 
 
+def add_capm_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--index-csv", default="data/sp500_daily.csv")
+    parser.add_argument(
+        "--constituents-csv",
+        default="data/sp500_constituents_daily.csv",
+    )
+    parser.add_argument("--betas-csv", default="data/sp500_constituent_betas.csv")
+    parser.add_argument(
+        "--output",
+        default="data/sp500_constituents_capm_daily_returns.csv",
+    )
+    parser.add_argument("--rf-daily", type=float, default=DEFAULT_RF_DAILY)
+
+
 def print_result(result: dict[str, Any], as_json: bool) -> None:
     if as_json:
         print(json.dumps(result, indent=2, sort_keys=True))
@@ -214,6 +258,11 @@ def print_result(result: dict[str, Any], as_json: bool) -> None:
             print(f"Skipped {len(result['errors'])} tickers with errors.")
     elif command == "calculate-betas":
         print(f"Wrote {result['betas']} stock betas to {result['output_path']}")
+    elif command == "calculate-capm-returns":
+        print(
+            f"Wrote {result['rows']} CAPM daily return rows to "
+            f"{result['output_path']}"
+        )
     elif command == "run-beta-pipeline":
         print(f"Downloaded {result['index']['rows']} index rows")
         print(
