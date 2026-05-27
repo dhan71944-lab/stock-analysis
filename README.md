@@ -57,6 +57,28 @@ For a quick smoke test, limit the number of constituents:
 python .\connectors\sp500_constituents_daily_connector.py --start 2024-01-02 --end 2024-01-05 --limit 3 --output .\data\sp500_constituents_daily_sample.csv
 ```
 
+## S&P 500 constituent betas
+
+After generating both return CSVs, calculate each constituent's beta against
+the S&P 500 index:
+
+```powershell
+python .\analysis\calculate_sp500_betas.py --index-csv .\data\sp500_daily.csv --constituents-csv .\data\sp500_constituents_daily.csv --output .\data\sp500_constituent_betas.csv
+```
+
+Beta is calculated as:
+
+```text
+covariance(stock returns, index returns) / variance(index returns)
+```
+
+The calculator joins stock and index returns by `date`, skips blank return rows,
+and writes one row per ticker:
+
+```text
+ticker, yahoo_symbol, company, sector, observations, beta
+```
+
 ## Note on NYSE data
 
 The S&P 500 is a market index, not a NYSE-listed stock, and its constituents
