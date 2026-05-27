@@ -1,4 +1,7 @@
 data/
 tools/
+.codex-review/
+use_github_tools.cmd
+use_github_tools.ps1
 __pycache__/
 *.py[cod]
