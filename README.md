@@ -1,7 +1,7 @@
 # Stock Analysis Connectors
 
 This workspace contains a small connector for downloading daily S&P 500 index
-price history as CSV.
+price history and close-to-close daily returns as CSV.
 
 ## S&P 500 daily connector
 
@@ -14,8 +14,17 @@ python .\connectors\sp500_daily_connector.py --start 2024-01-01 --end 2024-12-31
 Output columns:
 
 ```text
-date, open, high, low, close, volume
+date, open, high, low, close, volume, daily_return
 ```
+
+Daily return is calculated as:
+
+```text
+(close_t - close_t_minus_1) / close_t_minus_1
+```
+
+The first row's `daily_return` is blank because there is no prior close in the
+downloaded series.
 
 The default symbol is `^GSPC`, which represents the S&P 500 index. You can
 override it with `--symbol` if your upstream data source uses a different code.

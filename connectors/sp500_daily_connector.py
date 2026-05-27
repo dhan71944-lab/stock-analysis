@@ -47,7 +47,7 @@ class Sp500DailyConnector:
         """Download daily data and write it as a normalized CSV file.
 
         Output columns:
-            date, open, high, low, close, volume
+            date, open, high, low, close, volume, daily_return
         """
 
         output = Path(output_path)
@@ -67,7 +67,15 @@ class Sp500DailyConnector:
         with output.open("w", newline="", encoding="utf-8") as handle:
             writer = csv.DictWriter(
                 handle,
-                fieldnames=["date", "open", "high", "low", "close", "volume"],
+                fieldnames=[
+                    "date",
+                    "open",
+                    "high",
+                    "low",
+                    "close",
+                    "volume",
+                    "daily_return",
+                ],
             )
             writer.writeheader()
             writer.writerows(rows)
@@ -120,10 +128,15 @@ class Sp500DailyConnector:
             raise RuntimeError("Unexpected JSON format returned by the data source.")
 
         rows: list[dict[str, str]] = []
+        previous_close: float | None = None
         for index, timestamp in enumerate(timestamps):
             values = {name: quote[name][index] for name in required}
             if any(values[name] is None for name in required):
                 continue
+            close = float(values["close"])
+            daily_return = ""
+            if previous_close is not None:
+                daily_return = format_return((close - previous_close) / previous_close)
             rows.append(
                 {
                     "date": dt.datetime.fromtimestamp(
@@ -134,8 +147,10 @@ class Sp500DailyConnector:
                     "low": format_decimal(values["low"]),
                     "close": format_decimal(values["close"]),
                     "volume": str(int(values["volume"])),
+                    "daily_return": daily_return,
                 }
             )
+            previous_close = close
         return rows
 
 
@@ -145,6 +160,10 @@ def date_to_unix(value: dt.date) -> int:
 
 def format_decimal(value: float) -> str:
     return f"{value:.6f}".rstrip("0").rstrip(".")
+
+
+def format_return(value: float) -> str:
+    return f"{value:.10f}".rstrip("0").rstrip(".")
 
 
 def parse_date(value: str | None) -> dt.date | None:
